@@ -34,7 +34,7 @@ def extraer_ecuaciones_y_matrices(docx_file):
 
     return ecuaciones, matrices
 # Ejemplo de uso
-documento = "./doc/matriz1.docx"
+documento = "./programa//doc/matriz1.docx"
 ecuaciones_extraidas, matrices_extraidas = extraer_ecuaciones_y_matrices(documento)
 
 print(matrices_extraidas)
