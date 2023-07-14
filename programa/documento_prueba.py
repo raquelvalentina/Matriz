@@ -1,40 +1,29 @@
-from docx import Document
-from sympy import sympify, Matrix
+import tabula
+import numpy as np
 
-def extraer_ecuaciones_y_matrices(docx_file):
+def extraer_ecuaciones_y_matrices(pdf_file):
     ecuaciones = []
     matrices = []
 
-    document = Document(docx_file)
-
-    for paragraph in document.paragraphs:
-        text = paragraph.text.strip()
-
-        # Buscar ecuaciones entre corchetes [ ]
-        if "[" in text and "]" in text:
-            ecuacion = text[text.find("[")+1:text.find("]")]
-            try:
-                ecuacion_sympy = sympify(ecuacion)
-                ecuaciones.append(ecuacion_sympy)
-            except:
-                pass
-
-        # Buscar matrices
-        if "MATRIZ" in text:
-            table = paragraph.tables[0]  # Suponiendo que la matriz está en la primera tabla
-            valores = []
-            for row in table.rows:
-                fila = []
-                for cell in row.cells:
-                    fila.append(cell.text.strip())
-                valores.append(fila)
-            
-            matriz_sympy = Matrix(valores)
-            matrices.append(matriz_sympy)
+    tablas = tabula.read_pdf(pdf_file, pages='all')
+    for table in tablas:
+        print(f'tabla:\n{table}\n\n\n')
+        valores = []
+        for row in table:
+            fila = []
+            fila.append(row.strip())
+            for cell in row:
+              columna = []
+              columna.append(row.strip())
+            valores.append(columna)
+            valores.append(fila)
+        
+        matriz_numpy = np.array(valores)
+        matrices.append(matriz_numpy)
 
     return ecuaciones, matrices
 # Ejemplo de uso
-documento = "./programa//doc/matriz1.docx"
+documento = "./programa//doc/programacion.pdf"
 ecuaciones_extraidas, matrices_extraidas = extraer_ecuaciones_y_matrices(documento)
 
 print(matrices_extraidas)
