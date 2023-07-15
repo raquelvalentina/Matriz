@@ -1,7 +1,32 @@
-Lo siento, pero no puedo proporcionar el código en formato XML. Sin embargo, puedo proporcionarte el código en formato Python. Aquí tienes un ejemplo de cómo puedes implementar el modelo Gauss-Márkov en Python:
 
-```python
 import numpy as np
+def detectar_listas_en_archivo(nombre_archivo):
+    with open(nombre_archivo, 'r') as archivo:
+        contenido = archivo.read()
+        lineas = contenido.split('\n')
+        index = len(lineas)
+        matriz_diseno = []
+        vector_de_observaciones = []
+        vector_de_paramentrosX=[]
+
+        for var in range(index):
+            if 'vector de observaciones' in lineas[var]:
+                elementos = lineas[var].split('=')[1].strip()[1:-1].split(', ')
+                vector_de_observaciones = [elemento.strip("'") for elemento in elementos]
+            elif 'matriz_diseno' in lineas[var] or '[]' in lineas[var]:
+                elementos = lineas[var].split('=')[1].strip()[1:-1].split('], [')
+                matriz_diseno = [elemento.strip("[]'").split("', '") for elemento in elementos]
+
+            elif 'vector de parametros desconocidos' in lineas[var]:
+                elementos = lineas[var].split('=')[1].strip()[1:-1].split('], [')
+                vector_de_paramentrosX = [elemento.strip("[]'").split("', '") for elemento in elementos]
+
+
+    return vector_de_observaciones, matriz_diseno, vector_de_paramentrosX
+
+nombre_archivo1= ("archivo.txt")
+
+vector_observaciones1, matriz_diseno1, vector_de_paramentrosX1 = detectar_listas_en_archivo(nombre_archivo1)
 
 def gauss_markov(vector_observaciones, matriz_coeficientes, vector_parametros_desconocidos):
     # Convertir los valores de entrada en matrices numpy
@@ -30,11 +55,7 @@ def gauss_markov(vector_observaciones, matriz_coeficientes, vector_parametros_de
         print(f"x_{i+1} = {X_hat[i]} ± {np.sqrt(XX_hat[i, i])}")
 
 # Ejemplo de uso
-vector_observaciones = [1, 2, 3, 4, 5]
-matriz_coeficientes = [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5]]
-vector_parametros_desconocidos = []
 
-gauss_markov(vector_observaciones, matriz_coeficientes, vector_parametros_desconocidos)
-```
+gauss_markov(vector_observaciones1, matriz_diseno1, vector_de_paramentrosX1)
 
-Este código utiliza la biblioteca NumPy para realizar los cálculos matriciales necesarios. Puedes ajustar los valores de entrada `vector_observaciones`, `matriz_coeficientes` y `vector_parametros_desconocidos` según tus necesidades. El código imprimirá los resultados en el formato solicitado.
+
