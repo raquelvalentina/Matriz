@@ -1,0 +1,24 @@
+Matriz
+
+['y1', 'y2', 'y3', ':', 'yn'] = [['a11', 'a21', 'a31', ':', 'an1'],
+['a12', 'a22', 'a32', ':', 'an2'],
+['a13', 'a23', 'a33', ':', 'an3'],
+['...', '...', '...', ':', '...'],
+['a1m', 'a2m', 'a3m', ':', 'anm']]['x1', 'x2', 'x3', ':', 'xm']
+
+Donde y es el vector de observaciones, la matriz a con dimensiones nxm es la matriz de diseño
+y x es el vector de parametros desconocidos. 
+
+El modelo se escribe matricialmente como: [𝑌 = 𝐴𝑥 + 𝑒 ]
+
+Vector solucion formula: [𝑋̂ = ( 𝐴**𝑇*𝑃*𝐴)**−1 𝐴**𝑇 𝑃𝑌]
+
+vector de errores reiduales formula:[𝑒̃ = 𝐴𝑋̂ − 𝑌]
+
+la precision del ajuste formula: [𝜎̂**o_2 = 𝑒̃**𝑇 𝑃**𝑒̃/𝑛−𝑚]
+
+la matriz de varianzas y covarianzas formula: [∑𝑋𝑋 = 𝜎̂**o_2 ( 𝐴**𝑇 *𝑃*𝐴)**−1 ]
+
+
+
+
