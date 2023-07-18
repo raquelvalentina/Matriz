@@ -1,5 +1,5 @@
+import pandas as pd
 import numpy as np
-import sympy as sp
 
 def detectar_listas_en_archivo(nombre_archivo):
     with open(nombre_archivo, 'r') as archivo:
@@ -19,64 +19,59 @@ def detectar_listas_en_archivo(nombre_archivo):
                 elementos = lineas[var].split('=')[1].strip()[2:-2].split('], [')
                 valores = [elemento.split(', ') for elemento in elementos]
                 matriz_diseno = [[float(valor) if valor != '' else 0.0 for valor in fila] for fila in valores]
-            elif 'vector_de_parametrosX' in lineas[var]:
-                elementos = lineas[var].split('=')[1].strip()[2:-2].split('], [')
-                valores = [elemento.split(', ') for elemento in elementos]
-                vector_de_parametrosX = [[float(valor) if valor != '' else 0.0 for valor in fila] for fila in valores]
 
-    return vector_de_observaciones, matriz_diseno, vector_de_parametrosX
+    return vector_de_observaciones, matriz_diseno
 
-nombre_archivo1 = 'archivo.txt'
-vector_observaciones1, matriz_diseno1, vector_de_parametrosX1 = detectar_listas_en_archivo(nombre_archivo1)
+archivo= input('Nombre del archivo')
 
-def gauss_markov(y, a):
-    resultados = [] 
-    Y = sp.Matrix(y)
-    A = sp.Matrix(a)
-    P = A.T * A
+vector, matriz_de_coeficientes = detectar_listas_en_archivo(archivo)
 
-    X_hat = (A.T * P * A).inv() * A.T * P * Y
+def resolver_sistema(X_list, Y_list, nombre_archivo_resultados):
+    # Leer los datos
+    X = np.array(X_list)
+    Y = np.array(Y_list)
 
-    e_hat = A * X_hat - Y
+    # Calcular el vector de parámetros
+    XTX_inv = np.linalg.inv(X.T @ X)
+    beta_hat = XTX_inv @ X.T @ Y
 
-    n, m = A.shape
-    sigma_hat_squared = e_hat.T * P * e_hat / (n - m)
+    # Calcular el vector de errores residuales
+    errores = Y - X @ beta_hat
 
-    X_X = sigma_hat_squared * (A * P * A.T).inv() 
+    # Calcular la precisión del ajuste (R^2)
+    ss_res = np.sum(errores ** 2)
+    ss_tot = np.sum((Y - np.mean(Y)) ** 2)
+    r2 = 1 - (ss_res / ss_tot)
 
-    for i in range(len(X_hat)):
-        resultados.append(f'resultados_{i+1}: {X_hat[i]} +- {sp.sqrt(X_X[i, i])}')
+    # Calcular la matriz de varianzas y covarianzas
+    sigma2 = ss_res / (X.shape[0] - X.shape[1])
+    var_covar = sigma2 * XTX_inv
 
-    resultados_dict = {
-        'VECTOR_ERRORES_RESIDUALES': e_hat,
-        'PRECISION_DE_AJUSTE': sigma_hat_squared,
-        'MATRIZ_DE_VARIANZA_COVARIANZA': X_X
-    }
+    # Crear un DataFrame con los resultados de beta_hat
+    resultados_beta = pd.DataFrame({
+        "beta_hat": beta_hat.flatten(),
+    })
 
-    resultados.append(resultados_dict)
+    resultados_beta["r2"] = r2
 
-    return resultados
+    # Crear un DataFrame con los errores
+    resultados_errores = pd.DataFrame({
+        "errores": errores.flatten(),
+    })
 
-vector_observaciones1= [1, 2, 3, 5]
+    # Crear un DataFrame con la varianza y covarianza
+    resultados_var_covar = pd.DataFrame({
+        "var_covar_diagonal": np.diag(var_covar)
+    })
 
-matriz_diseno1 = [[1, 2, 3, 4], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]]
+    # Guardar los resultados en diferentes archivos CSV
+    resultados_beta.to_csv(nombre_archivo_resultados + "_beta.csv", index=False)
+    resultados_errores.to_csv(nombre_archivo_resultados + "_errores.csv", index=False)
+    resultados_var_covar.to_csv(nombre_archivo_resultados + "_var_covar.csv", index=False)
 
-if __name__ == '__main__':
+    print(f"Los resultados se han guardado en {nombre_archivo_resultados}_beta.csv, {nombre_archivo_resultados}_errores.csv, y {nombre_archivo_resultados}_var_covar.csv.")
 
-    l = gauss_markov(vector_observaciones1, matriz_diseno1)
+    return resultados_beta, resultados_errores, resultados_var_covar
 
-    for resultado in l:
-        print(resultado)
-    with open('resultados.txt', 'w') as resultados:
-        for resultado in l:
-            if isinstance(resultado, dict):
-                resultados.write("VECTOR_ERRORES_RESIDUALES:\n")
-                resultados.write(str(resultado['VECTOR_ERRORES_RESIDUALES']) + '\n')
-                resultados.write("PRECISION_DE_AJUSTE:\n")
-                resultados.write(str(resultado['PRECISION_DE_AJUSTE']) + '\n')
-                resultados.write("MATRIZ_DE_VARIANZA_COVARIANZA:\n")
-                resultados.write(str(resultado['MATRIZ_DE_VARIANZA_COVARIANZA']) + '\n')
-            else:
-                resultados.write(resultado + '\n')
-
+resolver_sistema(matriz_de_coeficientes, vector,'resultados.txt')
 
