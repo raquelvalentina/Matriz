@@ -22,7 +22,7 @@ def detectar_listas_en_archivo(nombre_archivo):
 
     return vector_de_observaciones, matriz_diseno
 
-archivo= input('Nombre del archivo')
+archivo= input('Indique el nombre del archivo:  ')
 
 vector, matriz_de_coeficientes = detectar_listas_en_archivo(archivo)
 
@@ -47,31 +47,31 @@ def resolver_sistema(X_list, Y_list, nombre_archivo_resultados):
     sigma2 = ss_res / (X.shape[0] - X.shape[1])
     var_covar = sigma2 * XTX_inv
 
-    # Crear un DataFrame con los resultados de beta_hat
+    # Crear un DataFrame con los resultados de el vector de parámetros
     resultados_beta = pd.DataFrame({
         "beta_hat": beta_hat.flatten(),
     })
 
     resultados_beta["r2"] = r2
 
-    # Crear un DataFrame con los errores
+    # Crear un DataFrame con los errores residuales
     resultados_errores = pd.DataFrame({
         "errores": errores.flatten(),
     })
 
-    # Crear un DataFrame con la varianza y covarianza
+    # Crear un DataFrame con la matriz de varianza y covarianza
     resultados_var_covar = pd.DataFrame({
         "var_covar_diagonal": np.diag(var_covar)
     })
 
     # Guardar los resultados en diferentes archivos CSV
     resultados_beta.to_csv(nombre_archivo_resultados + "_beta.csv", index=False)
-    resultados_errores.to_csv(nombre_archivo_resultados + "_errores.csv", index=False)
-    resultados_var_covar.to_csv(nombre_archivo_resultados + "_var_covar.csv", index=False)
+    resultados_errores.to_csv(nombre_archivo_resultados + "_errores_residuales.csv", index=False)
+    resultados_var_covar.to_csv(nombre_archivo_resultados + "_matriz_de_varianza__covarianza.csv", index=False)
 
     print(f"Los resultados se han guardado en {nombre_archivo_resultados}_beta.csv, {nombre_archivo_resultados}_errores.csv, y {nombre_archivo_resultados}_var_covar.csv.")
 
     return resultados_beta, resultados_errores, resultados_var_covar
 
-resolver_sistema(matriz_de_coeficientes, vector,'resultados.txt')
+resolver_sistema(matriz_de_coeficientes, vector, 'resultados.txt')
 
