@@ -1,38 +1,35 @@
 import numpy as np
 
-def calcular_valores(vector_de_observaciones, matriz_diseno, A, X, e, sigma_o2):
-    # Cálculo de la matriz A
-    A = matriz_diseno.T
+A = np.array([[1695.557, 700.000, 720.000, 740.000, 760.000, 780.000, 800.000], [1, 1, 1, 1, 1, 1, 1]])
+P = np.array([[2.43507E-08, 2.55232E-12, -1.8944E-09], [0, 1.8944E-09, 1.8944E-09], [0, 0, 1.8944E-09]])
+y = np.array([103.758, 104.113, 105.713, 107.313, 108.913, 110.513, 112.113])
 
-    # Cálculo de la matriz (A^T * P * A)^-1
-    ATA_inv = np.linalg.inv(np.dot(np.dot(A.T, sigma_o2), A))
+# # Reshape y to make it a column vector (7x1)
+# y_reshaped = y.reshape(-1, 1)
 
-    # Cálculo de X_hat
-    X_hat = np.dot(ATA_inv, np.dot(A.T, vector_de_observaciones))
+# # Reshape A to make it a 7x2 matrix
+# A_reshaped = np.transpose(A)
 
-    # Cálculo del vector de residuos e_hat
-    e_hat = vector_de_observaciones - np.dot(A, X_hat)
 
-    # Cálculo de sigma_hat^2
-    sigma_hat_squared = np.dot(np.dot(e_hat.T, sigma_o2), e_hat) / (len(vector_de_observaciones) - len(X_hat))
+# Perform the matrix operations
+ATA_inv = np.linalg.inv(np.transpose(A) @ P @ A)
+ATy = np.transpose(A) @ P @ y.reshape(-1, 1)
+VECTOR_SOLUCION = ATA_inv @ ATy
 
-    # Cálculo de MATRIZ_DE_VARIANZA_COVARIANZA
-    MATRIZ_DE_VARIANZA_COVARIANZA = ATA_inv * sigma_hat_squared
+print("VECTOR_SOLUCION:")
+print(VECTOR_SOLUCION)
 
-    return X_hat, e_hat, sigma_hat_squared, MATRIZ_DE_VARIANZA_COVARIANZA
+VECTOR_ERRORES_RESIDUALES = y.reshape(-1, 1) - A @ VECTOR_SOLUCION
 
-# Datos proporcionados
-vector_de_observaciones = np.array([103.758, 104.113, 105.713, 107.313, 108.913, 110.513, 112.113])
-matriz_diseno = np.array([[1695.557, 700.000, 720.000, 740.000, 760.000, 780.000, 800.000], [1, 1, 1, 1, 1, 1, 1]])
-A = np.array([[0.000104815, -0.07779615], [-0.07779615, 57.884906]])
-X = np.array([0.079997848, 48.11466023])
-e = np.array([0.0003, -0.0002, -0.0001, -0.0001, 0.0000, 0.0000, 0.0001])
-sigma_o2 = np.array([[2.43507E-08, 2.55232E-12, -1.8944E-09], [0, 1.8944E-09, 1.8944E-09]])
+print("VECTOR_ERRORES_RESIDUALES:")
+print(VECTOR_ERRORES_RESIDUALES)
 
-# Cálculo de los valores
-X_hat, e_hat, sigma_hat_squared, MATRIZ_DE_VARIANZA_COVARIANZA = calcular_valores(vector_de_observaciones, matriz_diseno, A, X, e, sigma_o2)
+PRECISION_DE_AJUSTE = 1 - (np.transpose(VECTOR_ERRORES_RESIDUALES) @ P @ VECTOR_ERRORES_RESIDUALES) / (np.transpose(y.reshape(-1, 1)) @ P @ y.reshape(-1, 1))
 
-print("X_hat:", X_hat)
-print("VECTOR_ERRORES_RESIDUALES:", e_hat)
-print("PRECISION_DE_AJUSTE:", sigma_hat_squared)
-print("MATRIZ_DE_VARIANZA_COVARIANZA:", MATRIZ_DE_VARIANZA_COVARIANZA)
+print("PRECISION_DE_AJUSTE:")
+print(PRECISION_DE_AJUSTE)
+
+MATRIZ_DE_VARIANZA_COVARIANZA = ATA_inv @ P
+
+print("MATRIZ_DE_VARIANZA_COVARIANZA:")
+print(MATRIZ_DE_VARIANZA_COVARIANZA)
